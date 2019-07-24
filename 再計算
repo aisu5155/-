@@ -1,0 +1,59 @@
+/**
+ * @OnlyCurrentDoc  Limits the script to only accessing the current spreadsheet.
+ */
+
+
+/**
+ * Adds a custom menu with items to show the sidebar and dialog.
+ *
+ * @param {Object} e The event parameter for a simple onOpen trigger.
+ */
+function onOpen(e) {
+  SpreadsheetApp.getUi()
+      .createAddonMenu()
+      .addItem('Re-calculate selected cells', 'recalculate')
+      .addToUi();
+}
+
+
+/**
+ * Force Spreadsheet to re-calculate selected cells
+ */
+function recalculate(){
+  var activeRange = SpreadsheetApp.getActiveRange();
+  var originalFormulas = activeRange.getFormulas();
+  var originalValues = activeRange.getValues();
+
+  var valuesToEraseFormula = [];
+  var valuesToRestoreFormula = [];
+
+  originalFormulas.forEach(function(outerVal, outerIdx){
+    valuesToEraseFormula[outerIdx] = [];
+    valuesToRestoreFormula[outerIdx] = [];
+    outerVal.forEach(function(innerVal, innerIdx){
+      if('' === innerVal){
+        //The cell doesn't have formula
+        valuesToEraseFormula[outerIdx][innerIdx] = originalValues[outerIdx][innerIdx];
+        valuesToRestoreFormula[outerIdx][innerIdx] = originalValues[outerIdx][innerIdx];
+      }else{
+        //The cell has a formula.
+        valuesToEraseFormula[outerIdx][innerIdx] = '';
+        valuesToRestoreFormula[outerIdx][innerIdx] = originalFormulas[outerIdx][innerIdx];
+      }
+    })
+  })
+
+  activeRange.setValues(valuesToEraseFormula);
+  activeRange.setValues(valuesToRestoreFormula);
+}
+
+
+/**
+ * Runs when the add-on is installed; calls onOpen() to ensure menu creation and
+ * any other initializion work is done immediately.
+ *
+ * @param {Object} e The event parameter for a simple onInstall trigger.
+ */
+function onInstall(e) {
+  onOpen(e);
+}
