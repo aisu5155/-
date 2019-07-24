@@ -1,0 +1,146 @@
+function FontColorCount(){
+  
+  var ActiveRange = SpreadsheetApp.getActiveRange();
+  var ActiveSheet = SpreadsheetApp.getActiveSheet();
+  var ActiveCell = ActiveRange.getFormula();//セルの文字を抜き取り
+  var address = ActiveCell;
+  var StringsCount = searchs(ActiveCell,'FontColorCount(');//FontColorCountの出現回数
+  var Count=0;
+  var countCells = 0;
+  
+  Logger.log("StringsCount="+StringsCount);
+  var FontColorCounthukusuu = searchs(address,'+FontColorCount');
+  if( FontColorCounthukusuu != 0){
+    Logger.log("FontColorCounthukusuu="+FontColorCounthukusuu);
+  }
+  
+  while(1){//)で区切った範囲だけのデータにセット
+    address = address.replace(/FontColorCount/,'');
+    address = address.replace(/=/,'');
+    address = address.replace(/\+/,'');
+    address = address.replace(/\$/,'');
+    Count += 1;
+    if(StringsCount == Count){
+      break;
+    }
+  }
+  
+  for(var i=1;i<=StringsCount;i++){
+    if( FontColorCounthukusuu >= 1){
+      FontColorCounthukusuu -= 1;
+      Count += 1;
+      continue;
+    }
+    Count=0;
+    Logger.log("i="+i);
+    var Opencakko = search(address,'(',i);
+    var Closecakko = search(address,')',i);
+    var cakkoaddress = address.slice(Opencakko+1,Closecakko);
+    Logger.log("Opencakko="+Opencakko);
+    Logger.log("Closecakko="+Closecakko);
+    Logger.log("cakkoaddress="+cakkoaddress);
+    var Fontaddress = cakkoaddress.slice(0,search(cakkoaddress,',',1));
+    Logger.log("Fontaddress="+Fontaddress);
+    var FontColor = ActiveSheet.getRange(Fontaddress).getFontColor();
+    Logger.log("FontColor="+FontColor);
+    
+    cakkoaddress = cakkoaddress.slice(search(cakkoaddress,',',1)+1);
+    Logger.log("cakkoaddress="+cakkoaddress);
+    
+    do {
+      if(searchB(cakkoaddress,',') != 0){
+        Fontaddress = cakkoaddress.slice(search(cakkoaddress,',',Count),search(cakkoaddress,',',Count+1));
+      }else{
+        Fontaddress = cakkoaddress.slice(search(cakkoaddress,',',Count));
+      }
+      Fontaddress = Fontaddress.replace(/,/,'');
+      Logger.log("Fontaddress="+Fontaddress);
+      var FontColors = ActiveSheet.getRange(Fontaddress).getFontColors();
+      
+      for (var tate=0;tate<FontColors.length; tate++){//色セル数えるループ
+        for (var yoko = 0;yoko<FontColors[tate].length; yoko++){
+          if ( FontColors[tate][yoko] == FontColor){
+            countCells = countCells + 1;
+            Logger.log(countCells);
+          }
+        }
+      }
+      
+      Count += 1;
+    }while(Count!=searchB(cakkoaddress,',')+1);
+    
+  }
+  Logger.log("address="+address);
+  
+
+  
+  return countCells;
+  
+};
+
+function search(string,character,MatchCount){//サーチ関数 1=参照文字列 2=検索対象文字 3=出現回数 返り値=文字の位置
+  if(MatchCount==0){
+    return 0;
+  }
+  if(MatchCount>searchB(string,character)){
+    return string.length;
+  }
+  
+  var count = 0;
+  var stringTemp;
+  var MatchCountTemp = 0;
+  while(1){
+    stringTemp = string.slice(count,count+1);//一文字ずつ処理
+    if(stringTemp == character){// 検索条件の引数と抜出文字の合致
+      MatchCountTemp += 1;
+      if(MatchCount==MatchCountTemp){//同じ文字の出現回数があっているかどうか
+        return count;
+      }
+    }
+    if(stringTemp == ""){//検索合致がないときの処理
+      return 0;
+    }
+    count += 1;
+  }
+}
+
+function searchB(string,character){//サーチ関数2 1=参照文字列 2=検索対象文字 返り値=出現回数
+  
+  var count = 0;
+  var stringTemp;
+  var MatchCount = 0;
+  
+  while(1){
+    stringTemp = string.slice(count,count+1);//一文字ずつ処理
+    if(stringTemp == character){// 検索条件の引数と抜出文字の合致
+      MatchCount += 1;
+    }
+    if(stringTemp == ""){//検索合致がないときの処理
+      return MatchCount;
+    }
+    count += 1;
+  }
+}
+
+function searchs(string,character){//サーチ関数3 1=参照文字列 2=検索対象文字列 返り値=出現回数
+  
+  var count = 0;
+  var stringTemp;
+  var characterlength = character.length;//検索する文字数の設定
+  var MatchCount = 0;
+  
+  while(1){
+    stringTemp = string.slice(count,count+characterlength);//一文字ずつ処理
+    if(stringTemp == character){//検索合致がないときの処理
+      MatchCount += 1;
+    }else{
+      
+    }
+    if(stringTemp == ""){
+      return MatchCount;
+    }
+    count += 1;
+  }
+}
+
+
